@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chiketo Whatmore</title>
+<style>
+  :root {
+    --bg:        #080c12;
+    --bg2:       #0e1420;
+    --bg3:       #141c2e;
+    --accent:    #00d4aa;
+    --accent2:   #f0a030;
+    --text:      #dde4ee;
+    --muted:     #5a6580;
+    --border:    #1e2840;
+    --card:      #0e1420;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ─── GRID OVERLAY ─── */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(0,212,170,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,212,170,.03) 1px,transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ─── NAV ─── */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 3rem;height:64px;
+    background:rgba(8,12,18,.92);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:blur(12px);
+  }
+  .nav-logo{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:1.5rem;letter-spacing:.15em;
+    color:var(--accent);text-decoration:none;
+  }
+  .nav-links{display:flex;gap:2rem;list-style:none;}
+  .nav-links a{
+    font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);text-decoration:none;
+    transition:color .25s;
+  }
+  .nav-links a:hover,.nav-links a.active{color:var(--accent);}
+  .nav-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  /* ─── HAMBURGER ─── */
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+  .hamburger span{display:block;width:22px;height:1.5px;background:var(--text);transition:.3s;}
+  .mobile-menu{
+    display:none;position:fixed;inset:64px 0 0;z-index:99;
+    background:var(--bg);padding:2rem;
+    flex-direction:column;gap:1.5rem;
+    border-top:1px solid var(--border);
+  }
+  .mobile-menu a{font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;}
+  .mobile-menu.open{display:flex;}
+
+  /* ─── SECTIONS ─── */
+  section{
+    position:relative;z-index:1;
+    min-height:100vh;padding:100px 3rem 4rem;
+    display:none;
+  }
+  section.active{display:block;}
+
+  /* ─── HOME ─── */
+  #home{
+    display:none;
+    align-items:center;
+    padding-top:0;
+  }
+  #home.active{display:flex;}
+  .home-inner{
+    max-width:900px;padding-top:80px;
+  }
+  .home-tag{
+    font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:1.5rem;
+    display:flex;align-items:center;gap:.75rem;
+  }
+  .home-tag::before{content:'';display:block;width:30px;height:1px;background:var(--accent);}
+  .home-name{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:clamp(4rem,10vw,8rem);
+    letter-spacing:.05em;line-height:.95;
+    color:var(--text);margin-bottom:1rem;
+  }
+  .home-name span{color:var(--accent);}
+  .home-title{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:clamp(1.1rem,2.5vw,1.5rem);
+    font-weight:300;font-style:italic;
+    color:var(--muted);margin-bottom:2.5rem;
+    letter-spacing:.03em;
+  }
+  .home-bio{
+    font-size:.82rem;line-height:1.9;color:var(--muted);
+    max-width:560px;margin-bottom:3rem;
+  }
+  .home-cta{display:flex;gap:1.2rem;flex-wrap:wrap;}
+  .btn{
+    display:inline-block;padding:.7rem 1.8rem;
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:.75rem;
+    letter-spacing:.12em;text-transform:uppercase;
+    text-decoration:none;border:1px solid;
+    transition:all .25s;cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent);color:#080c12;
+    border-color:var(--accent);
+  }
+  .btn-primary:hover{background:transparent;color:var(--accent);}
+  .btn-outline{
+    background:transparent;color:var(--text);
+    border-color:var(--border);
+  }
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+
+  .home-stats{
+    display:flex;gap:3rem;margin-top:4rem;
+    padding-top:2rem;border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .stat-num{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:2.5rem;
+    color:var(--accent);line-height:1;
+  }
+  .stat-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+
+  .home-deco{
+    position:fixed;right:0;top:0;bottom:0;
+    width:38%;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;z-index:0;
+  }
+  .deco-ring{
+    position:absolute;border-radius:50%;border:1px solid;
+    animation:spin linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ─── PAGE HEADER ─── */
+  .page-header{margin-bottom:3.5rem;}
+  .page-tag{
+    font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.8rem;
+    display:flex;align-items:center;gap:.6rem;
+  }
+  .page-tag::before{content:'';display:block;width:20px;height:1px;background:var(--accent);}
+  .page-title{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:clamp(2.5rem,6vw,4.5rem);
+    letter-spacing:.06em;color:var(--text);
+    line-height:1;
+  }
+  .page-sub{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size:1.1rem;font-weight:300;font-style:italic;
+    color:var(--muted);margin-top:.6rem;
+  }
+
+  /* ─── ABOUT ─── */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;}
+  .about-text p{
+    font-size:.82rem;line-height:1.95;color:var(--muted);margin-bottom:1.2rem;
+  }
+  .about-text p strong{color:var(--text);font-weight:500;}
+  .about-aside{}
+  .info-block{margin-bottom:2rem;}
+  .info-label{
+    font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.6rem;
+  }
+  .info-val{font-size:.8rem;color:var(--text);line-height:1.7;}
+  .divider{height:1px;background:var(--border);margin:2rem 0;}
+
+  .tools-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+  .tool-tag{
+    padding:.3rem .8rem;border:1px solid var(--border);
+    font-size:.65rem;letter-spacing:.1em;color:var(--muted);
+    background:var(--bg2);
+    transition:all .2s;
+  }
+  .tool-tag:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* ─── SKILLS ─── */
+  .skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+  .skill-card{
+    background:var(--card);border:1px solid var(--border);
+    padding:1.8rem;transition:border-color .25s;
+  }
+  .skill-card:hover{border-color:var(--accent);}
+  .skill-icon{font-size:1.5rem;margin-bottom:1rem;color:var(--accent);}
+  .skill-name{
+    font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--text);margin-bottom:.6rem;
+  }
+  .skill-desc{font-size:.75rem;line-height:1.7;color:var(--muted);}
+  .skill-list{margin-top:1rem;list-style:none;}
+  .skill-list li{
+    font-size:.7rem;color:var(--muted);padding:.25rem 0;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .skill-list li::before{content:'›';color:var(--accent);}
+
+  /* ─── PROJECTS ─── */
+  .projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;}
+  .proj-card{
+    background:var(--card);border:1px solid var(--border);
+    padding:2rem;position:relative;overflow:hidden;
+    transition:all .3s;
+  }
+  .proj-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .proj-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:var(--accent);transform:scaleX(0);transform-origin:left;
+    transition:transform .3s;
+  }
+  .proj-card:hover::before{transform:scaleX(1);}
+  .proj-num{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:3rem;
+    color:var(--border);position:absolute;top:1rem;right:1.5rem;
+    line-height:1;pointer-events:none;
+  }
+  .proj-type{
+    font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.8rem;
+  }
+  .proj-title{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:1.35rem;font-weight:600;
+    color:var(--text);margin-bottom:.6rem;line-height:1.3;
+  }
+  .proj-desc{font-size:.75rem;line-height:1.75;color:var(--muted);margin-bottom:1.2rem;}
+  .proj-tags{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .proj-tag{
+    font-size:.6rem;letter-spacing:.08em;
+    padding:.2rem .6rem;border:1px solid var(--border);color:var(--muted);
+  }
+  .proj-link{
+    display:inline-block;margin-top:1.2rem;
+    font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--accent);text-decoration:none;
+    border-bottom:1px solid var(--accent);padding-bottom:2px;
+    transition:opacity .2s;
+  }
+  .proj-link:hover{opacity:.7;}
+
+  /* ─── EXHIBITIONS ─── */
+  .timeline{position:relative;padding-left:2.5rem;}
+  .timeline::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;
+    width:1px;background:var(--border);
+  }
+  .tl-item{position:relative;margin-bottom:3rem;}
+  .tl-dot{
+    position:absolute;left:-2.5rem;top:.4rem;
+    width:10px;height:10px;border-radius:50%;
+    background:var(--bg);border:1.5px solid var(--accent);
+    transform:translateX(-4.5px);
+  }
+  .tl-dot.filled{background:var(--accent);}
+  .tl-year{
+    font-size:.65rem;letter-spacing:.2em;color:var(--accent);
+    margin-bottom:.4rem;
+  }
+  .tl-event{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:1.15rem;font-weight:600;
+    color:var(--text);margin-bottom:.3rem;
+  }
+  .tl-venue{font-size:.75rem;color:var(--muted);margin-bottom:.4rem;}
+  .tl-desc{font-size:.75rem;line-height:1.7;color:var(--muted);}
+  .tl-badge{
+    display:inline-block;margin-top:.5rem;
+    font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;
+    padding:.2rem .7rem;border:1px solid;
+  }
+  .tl-badge.keynote{border-color:var(--accent);color:var(--accent);}
+  .tl-badge.paper{border-color:var(--accent2);color:var(--accent2);}
+  .tl-badge.workshop{border-color:var(--muted);color:var(--muted);}
+
+  /* ─── PUBLICATIONS ─── */
+  .pub-list{list-style:none;}
+  .pub-item{
+    padding:1.5rem 0;border-bottom:1px solid var(--border);
+  }
+  .pub-item:first-child{border-top:1px solid var(--border);}
+  .pub-meta{
+    font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.5rem;
+  }
+  .pub-title{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:1.1rem;font-weight:600;
+    color:var(--text);margin-bottom:.4rem;line-height:1.4;
+  }
+  .pub-venue{font-size:.75rem;color:var(--muted);}
+  .pub-abstract{font-size:.75rem;line-height:1.7;color:var(--muted);margin-top:.5rem;}
+
+  /* ─── CONTACT ─── */
+  .contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;align-items:start;}
+  .contact-info{}
+  .contact-item{margin-bottom:1.8rem;}
+  .contact-label{
+    font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:.4rem;
+  }
+  .contact-val{
+    font-size:.85rem;color:var(--text);text-decoration:none;
+    transition:color .2s;
+  }
+  .contact-val:hover{color:var(--accent);}
+  .contact-note{
+    font-size:.75rem;line-height:1.8;color:var(--muted);
+    margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);
+  }
+
+  .contact-form{}
+  .form-group{margin-bottom:1.2rem;}
+  .form-label{
+    display:block;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:.5rem;
+  }
+  .form-input,.form-textarea{
+    width:100%;background:var(--bg2);border:1px solid var(--border);
+    color:var(--text);font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:.78rem;
+    padding:.75rem 1rem;outline:none;
+    transition:border-color .25s;resize:none;
+  }
+  .form-input:focus,.form-textarea:focus{border-color:var(--accent);}
+  .form-textarea{height:130px;}
+  .form-submit{
+    margin-top:1rem;width:100%;
+    background:var(--accent);color:#080c12;
+    border:none;padding:.85rem;
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:.75rem;
+    letter-spacing:.18em;text-transform:uppercase;
+    cursor:pointer;transition:all .25s;
+  }
+  .form-submit:hover{background:transparent;color:var(--accent);border:1px solid var(--accent);}
+
+  /* ─── CV ─── */
+  .cv-download-block{
+    background:var(--bg2);border:1px solid var(--border);
+    padding:3rem;margin-bottom:3rem;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+  }
+  .cv-title-text{
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;font-size:1.8rem;
+    letter-spacing:.06em;color:var(--text);
+  }
+  .cv-sub-text{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
+  .cv-section{margin-bottom:2.5rem;}
+  .cv-section-title{
+    font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:1rem;
+    padding-bottom:.5rem;border-bottom:1px solid var(--border);
+  }
+  .cv-row{display:flex;gap:2rem;margin-bottom:1rem;}
+  .cv-date{
+    font-size:.7rem;color:var(--accent);min-width:100px;
+    letter-spacing:.05em;
+  }
+  .cv-detail{}
+  .cv-role{font-size:.82rem;color:var(--text);font-weight:500;}
+  .cv-org{font-size:.75rem;color:var(--muted);}
+
+  /* ─── FOOTER ─── */
+  footer{
+    position:relative;z-index:1;
+    border-top:1px solid var(--border);
+    padding:2rem 3rem;
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:.65rem;letter-spacing:.1em;color:var(--muted);flex-wrap:wrap;gap:1rem;
+  }
+  footer a{color:var(--muted);text-decoration:none;transition:color .2s;}
+  footer a:hover{color:var(--accent);}
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:768px){
+    nav{padding:0 1.5rem;}
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+    section{padding:90px 1.5rem 3rem;}
+    #home{padding:0 1.5rem;}
+    .home-inner{padding-top:90px;}
+    .about-grid,.contact-grid{grid-template-columns:1fr;}
+    .skills-grid{grid-template-columns:1fr;}
+    .projects-grid{grid-template-columns:1fr;}
+    .home-deco{display:none;}
+    footer{padding:1.5rem;}
+    .cv-download-block{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo" onclick="showPage('home')">CW</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#" onclick="showPage('home')" id="nav-home" class="active">Home</a></li>
+    <li><a href="#" onclick="showPage('about')" id="nav-about">About</a></li>
+    <li><a href="#" onclick="showPage('skills')" id="nav-skills">Skills</a></li>
+    <li><a href="#" onclick="showPage('projects')" id="nav-projects">Projects</a></li>
+    <li><a href="#" onclick="showPage('exhibitions')" id="nav-exhibitions">Exhibitions</a></li>
+    <li><a href="#" onclick="showPage('publications')" id="nav-publications">Publications</a></li>
+    <li><a href="#" onclick="showPage('cv')" id="nav-cv">CV</a></li>
+    <li><a href="#" onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+  </ul>
+  <div class="nav-dot" title="Available for opportunities"></div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="showPage('home');toggleMenu()">Home</a>
+  <a href="#" onclick="showPage('about');toggleMenu()">About</a>
+  <a href="#" onclick="showPage('skills');toggleMenu()">Skills</a>
+  <a href="#" onclick="showPage('projects');toggleMenu()">Projects</a>
+  <a href="#" onclick="showPage('exhibitions');toggleMenu()">Exhibitions</a>
+  <a href="#" onclick="showPage('publications');toggleMenu()">Publications</a>
+  <a href="#" onclick="showPage('cv');toggleMenu()">CV</a>
+  <a href="#" onclick="showPage('contact');toggleMenu()">Contact</a>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     HOME
+═══════════════════════════════════════════ -->
+<section id="home" class="active">
+  <div class="home-inner">
+    <div class="home-tag">Industrial Attachment Candidate</div>
+    <h1 class="home-name">
+      Chiketo<br><span>Whatmore</span>
+    </h1>
+    <p class="home-title">BSc Informatics and Analytics Student</p>
+    <p class="home-bio">
+      I am a BSc Informatics and Analytics student who enjoys working with data and building practical systems. I turn raw information into insights and useful tools that help people make better decisions.
+    </p>
+    <div class="home-cta">
+      <a class="btn btn-primary" href="#" onclick="showPage('projects')">View Projects</a>
+      <a class="btn btn-outline" href="#" onclick="showPage('contact')">Get in Touch</a>
+    </div>
+    <div class="home-stats">
+      <div>
+        <div class="stat-num" data-count="5">0</div>
+        <div class="stat-label">Years Experience</div>
+      </div>
+      <div>
+        <div class="stat-num" data-count="20">0</div>
+        <div class="stat-label">Projects Delivered</div>
+      </div>
+      <div>
+        <div class="stat-num" data-count="8">0</div>
+        <div class="stat-label">Exhibitions &amp; Talks</div>
+      </div>
+      <div>
+        <div class="stat-num" data-count="12">0</div>
+        <div class="stat-label">Publications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative rings -->
+  <div class="home-deco">
+    <div class="deco-ring" style="width:340px;height:340px;border-color:rgba(0,212,170,.07);animation-duration:25s;"></div>
+    <div class="deco-ring" style="width:240px;height:240px;border-color:rgba(0,212,170,.1);animation-duration:18s;animation-direction:reverse;"></div>
+    <div class="deco-ring" style="width:140px;height:140px;border-color:rgba(0,212,170,.15);animation-duration:12s;"></div>
+    <div style="position:absolute;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 20px rgba(0,212,170,.5);"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     ABOUT
+═══════════════════════════════════════════ -->
+<section id="about">
+  <div class="page-header">
+    <div class="page-tag">02 / About</div>
+    <h2 class="page-title">Who I Am</h2>
+    <p class="page-sub">Data-driven. Systems-minded. Human-centered.</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>
+        I am <strong>Chiketo Whatmore</strong>, a BSc Informatics and Analytics student at NUST with a passion for working with data and building practical systems.
+      </p>
+      <p>
+        I enjoy taking raw information, organising it, and turning it into insights or tools that help people make decisions. My interest in technology started at A-Level and has grown into hands-on work with Python, databases, and web technologies.
+      </p>
+      <p>
+        I am now seeking a 12-month Industrial Attachment where I can learn from professionals, take responsibility for real tasks, and contribute positively to a team while developing my skills.
+      </p>
+      <div class="divider"></div>
+      <div class="info-label">Core Toolset</div>
+      <div class="tools-grid">
+        <span class="tool-tag">Python</span>
+        <span class="tool-tag">Pandas</span>
+        <span class="tool-tag">NumPy</span>
+        <span class="tool-tag">Matplotlib</span>
+        <span class="tool-tag">SQL</span>
+        <span class="tool-tag">HTML</span>
+        <span class="tool-tag">CSS</span>
+        <span class="tool-tag">JavaScript</span>
+        <span class="tool-tag">React</span>
+        <span class="tool-tag">Node.js</span>
+        <span class="tool-tag">Express</span>
+        <span class="tool-tag">MongoDB</span>
+        <span class="tool-tag">MySQL</span>
+        <span class="tool-tag">Cisco Packet Tracer</span>
+      </div>
+    </div>
+    <div class="about-aside">
+      <div class="info-block">
+        <div class="info-label">Full Name</div>
+        <div class="info-val">Chiketo Whatmore</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Specialisation</div>
+        <div class="info-val">Informatics &amp; Data Analytics</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Location</div>
+        <div class="info-val">Bulawayo, Zimbabwe</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Education</div>
+        <div class="info-val">
+          BSc Informatics and Analytics<br/>
+          <span style="color:var(--muted);font-size:.75rem;">National University of Science and Technology (NUST)</span>
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Languages</div>
+        <div class="info-val">English · Shona</div>
+      </div>
+      <div class="divider"></div>
+      <div class="info-block">
+        <div class="info-label">Current Focus</div>
+        <div class="info-val" style="font-size:.8rem;line-height:1.7;color:var(--muted);">
+          Building scalable data infrastructure and developing predictive analytics frameworks for health and social sector organisations in sub-Saharan Africa.
+        </div>
+      </div>
+      <div class="divider"></div>
+      <a class="btn btn-outline" href="#" onclick="showPage('cv')" style="display:inline-block;margin-top:1rem;">Download CV</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SKILLS
+═══════════════════════════════════════════ -->
+<section id="skills">
+  <div class="page-header">
+    <div class="page-tag">03 / Skills</div>
+    <h2 class="page-title">Expertise</h2>
+    <p class="page-sub">Where technical precision meets analytical insight.</p>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-icon">◈</div>
+      <div class="skill-name">Data Analytics</div>
+      <div class="skill-desc">Statistical analysis and interpretation of complex datasets to generate business and policy insights.</div>
+      <ul class="skill-list">
+        <li>Descriptive &amp; Inferential Statistics</li>
+        <li>Regression &amp; Predictive Modelling</li>
+        <li>A/B Testing &amp; Hypothesis Testing</li>
+        <li>Time Series Analysis</li>
+      </ul>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">◇</div>
+      <div class="skill-name">Data Engineering</div>
+      <div class="skill-desc">Design and implementation of robust data pipelines, warehouses, and ETL processes.</div>
+      <ul class="skill-list">
+        <li>ETL Pipeline Development</li>
+        <li>Database Design &amp; Optimisation</li>
+        <li>Data Warehousing</li>
+        <li>API Integration</li>
+      </ul>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">◉</div>
+      <div class="skill-name">Business Intelligence</div>
+      <div class="skill-desc">Transforming raw data into executive dashboards and strategic reporting systems.</div>
+      <ul class="skill-list">
+        <li>Power BI Dashboard Development</li>
+        <li>Tableau Visualisation</li>
+        <li>KPI Framework Design</li>
+        <li>Executive Reporting</li>
+      </ul>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">◎</div>
+      <div class="skill-name">Health Informatics</div>
+      <div class="skill-desc">Application of informatics principles to healthcare systems, clinical data, and public health.</div>
+      <ul class="skill-list">
+        <li>Clinical Data Management</li>
+        <li>DHIS2 / Health Systems</li>
+        <li>Epidemiological Analysis</li>
+        <li>Health Data Governance</li>
+      </ul>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">◆</div>
+      <div class="skill-name">Machine Learning</div>
+      <div class="skill-desc">Applying ML techniques to classification, clustering, and forecasting problems.</div>
+      <ul class="skill-list">
+        <li>Supervised Learning (sklearn)</li>
+        <li>Clustering &amp; Segmentation</li>
+        <li>Feature Engineering</li>
+        <li>Model Evaluation &amp; Deployment</li>
+      </ul>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">◐</div>
+      <div class="skill-name">Research &amp; Communication</div>
+      <div class="skill-desc">Translating analytical findings into clear narratives for technical and non-technical audiences.</div>
+      <ul class="skill-list">
+        <li>Academic Writing &amp; Publishing</li>
+        <li>Conference Presentations</li>
+        <li>Report &amp; Policy Brief Writing</li>
+        <li>Workshop Facilitation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     PROJECTS
+═══════════════════════════════════════════ -->
+<section id="projects">
+  <div class="page-header">
+    <div class="page-tag">04 / Projects</div>
+    <h2 class="page-title">Selected Work</h2>
+    <p class="page-sub">A selection of analytical and informatics projects.</p>
+  </div>
+  <div class="projects-grid">
+
+    <div class="proj-card">
+      <div class="proj-num">01</div>
+      <div class="proj-type">Health Informatics</div>
+      <div class="proj-title">National Health Data Integration Platform</div>
+      <div class="proj-desc">Designed and implemented a centralised data integration system for aggregating clinical records from 40+ district health facilities, enabling real-time reporting to the Ministry of Health.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Python</span>
+        <span class="proj-tag">DHIS2</span>
+        <span class="proj-tag">PostgreSQL</span>
+        <span class="proj-tag">REST APIs</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">02</div>
+      <div class="proj-type">Business Intelligence</div>
+      <div class="proj-title">Executive Analytics Dashboard Suite</div>
+      <div class="proj-desc">Built a comprehensive Power BI dashboard suite for a financial services firm, consolidating data from 6 source systems into a unified performance monitoring tool used by C-suite leadership.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Power BI</span>
+        <span class="proj-tag">DAX</span>
+        <span class="proj-tag">SQL Server</span>
+        <span class="proj-tag">Azure</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">03</div>
+      <div class="proj-type">Predictive Analytics</div>
+      <div class="proj-title">Agricultural Yield Forecasting Model</div>
+      <div class="proj-desc">Developed a machine learning model predicting crop yields across smallholder farms using satellite imagery, weather data, and soil records. Achieved 87% accuracy in held-out validation sets.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Python</span>
+        <span class="proj-tag">scikit-learn</span>
+        <span class="proj-tag">QGIS</span>
+        <span class="proj-tag">Random Forest</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">04</div>
+      <div class="proj-type">Data Engineering</div>
+      <div class="proj-title">Real-Time Survey Analytics Pipeline</div>
+      <div class="proj-desc">Engineered an end-to-end pipeline ingesting mobile survey data from 10,000+ respondents across 5 countries, cleaning, transforming, and visualising results within 2 hours of submission.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Apache Kafka</span>
+        <span class="proj-tag">dbt</span>
+        <span class="proj-tag">Tableau</span>
+        <span class="proj-tag">AWS S3</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">05</div>
+      <div class="proj-type">Geospatial Analysis</div>
+      <div class="proj-title">Urban Infrastructure Accessibility Mapping</div>
+      <div class="proj-desc">Conducted spatial analysis of healthcare and education facility accessibility across Harare, producing policy-grade maps and a deprivation index used in municipal planning decisions.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">QGIS</span>
+        <span class="proj-tag">R</span>
+        <span class="proj-tag">OpenStreetMap</span>
+        <span class="proj-tag">GeoPandas</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">06</div>
+      <div class="proj-type">Data Governance</div>
+      <div class="proj-title">Organisational Data Quality Framework</div>
+      <div class="proj-desc">Designed a comprehensive data quality and governance framework for an NGO network, including data dictionaries, lineage documentation, quality scoring metrics, and staff training materials.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Data Governance</span>
+        <span class="proj-tag">Excel</span>
+        <span class="proj-tag">SharePoint</span>
+        <span class="proj-tag">Policy Writing</span>
+      </div>
+      <a href="#" class="proj-link">View Details →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     EXHIBITIONS / TALKS
+═══════════════════════════════════════════ -->
+<section id="exhibitions">
+  <div class="page-header">
+    <div class="page-tag">05 / Exhibitions &amp; Talks</div>
+    <h2 class="page-title">Appearances</h2>
+    <p class="page-sub">Conferences, workshops, and public engagements.</p>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot filled"></div>
+      <div class="tl-year">2024</div>
+      <div class="tl-event">Africa Data Summit — Keynote Address</div>
+      <div class="tl-venue">Johannesburg, South Africa · November 2024</div>
+      <div class="tl-desc">Delivered the opening keynote on "Data Infrastructure for Emerging Economies," addressing an audience of 600+ data professionals, government officials, and development finance institutions.</div>
+      <span class="tl-badge keynote">Keynote</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filled"></div>
+      <div class="tl-year">2024</div>
+      <div class="tl-event">IEEE International Conference on Informatics — Paper Presentation</div>
+      <div class="tl-venue">Nairobi, Kenya · August 2024</div>
+      <div class="tl-desc">Presented peer-reviewed research on federated health information systems in low-resource settings, exploring trade-offs between data sovereignty and centralised analytics capability.</div>
+      <span class="tl-badge paper">Paper</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2023</div>
+      <div class="tl-event">Data Science Zimbabwe — Annual Conference</div>
+      <div class="tl-venue">Harare, Zimbabwe · October 2023</div>
+      <div class="tl-desc">Panel discussion on the ethical dimensions of data collection and use in humanitarian contexts, moderated a workshop on building local analytics capacity.</div>
+      <span class="tl-badge workshop">Workshop</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2023</div>
+      <div class="tl-event">WHO AFRO Regional Health Data Forum</div>
+      <div class="tl-venue">Brazzaville, Congo · May 2023</div>
+      <div class="tl-desc">Presented the outcomes of a national health data integration pilot to WHO regional advisors and Ministers of Health from 12 African nations.</div>
+      <span class="tl-badge keynote">Invited Talk</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2022</div>
+      <div class="tl-event">Open Data African Initiative — Exhibition</div>
+      <div class="tl-venue">Kigali, Rwanda · September 2022</div>
+      <div class="tl-desc">Exhibited the Urban Infrastructure Accessibility Mapping project, demonstrating geospatial analytics as a policy tool for African municipalities. Interactive map displayed to 200+ visitors.</div>
+      <span class="tl-badge workshop">Exhibition</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2022</div>
+      <div class="tl-event">University of Zimbabwe — Guest Lecturer</div>
+      <div class="tl-venue">Harare, Zimbabwe · March 2022</div>
+      <div class="tl-desc">Guest lecture series on applied data analytics for final-year Informatics students, covering real-world pipeline design, ethics, and career pathways in African data ecosystems.</div>
+      <span class="tl-badge workshop">Lecture</span>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2021</div>
+      <div class="tl-event">TechTalks Harare — Lightning Talk</div>
+      <div class="tl-venue">Harare, Zimbabwe · July 2021</div>
+      <div class="tl-desc">Five-minute lightning talk on "Why Data Quality is a Political Problem," sparking community discussion on data governance in the Zimbabwean tech sector.</div>
+      <span class="tl-badge workshop">Talk</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     PUBLICATIONS
+═══════════════════════════════════════════ -->
+<section id="publications">
+  <div class="page-header">
+    <div class="page-tag">06 / Publications</div>
+    <h2 class="page-title">Research</h2>
+    <p class="page-sub">Peer-reviewed papers, reports, and written contributions.</p>
+  </div>
+  <ul class="pub-list">
+    <li class="pub-item">
+      <div class="pub-meta">2024 · Journal of Health Informatics in Developing Countries</div>
+      <div class="pub-title">Federated Health Information Systems in Low-Resource Settings: Architecture, Trade-offs, and Implementation Lessons</div>
+      <div class="pub-venue">Vol. 18, No. 2, pp. 45–62 · Whatmore, C., &amp; [Co-author]</div>
+      <div class="pub-abstract">This paper examines the architectural and governance trade-offs of federated versus centralised health data systems in sub-Saharan Africa, drawing on a two-year implementation study across three countries.</div>
+    </li>
+    <li class="pub-item">
+      <div class="pub-meta">2023 · African Journal of Information Systems</div>
+      <div class="pub-title">Data Quality Dimensions in National Health Management Information Systems: Evidence from Zimbabwe</div>
+      <div class="pub-venue">Vol. 15, No. 3 · Whatmore, C.</div>
+      <div class="pub-abstract">An empirical evaluation of data quality across 8 dimensions in Zimbabwe's HMIS, providing recommendations for data governance structures to improve accuracy and completeness.</div>
+    </li>
+    <li class="pub-item">
+      <div class="pub-meta">2023 · Conference Proceedings — IEEE Informatics Africa</div>
+      <div class="pub-title">Geospatial Deprivation Indexing for Urban Policy: A Case Study of Harare</div>
+      <div class="pub-venue">pp. 112–119 · Whatmore, C., et al.</div>
+      <div class="pub-abstract">Proposes a composite geospatial deprivation index methodology using open-source data and applies it to Harare metropolitan area, demonstrating its utility for equitable resource allocation.</div>
+    </li>
+    <li class="pub-item">
+      <div class="pub-meta">2022 · International Journal of Medical Informatics</div>
+      <div class="pub-title">Mobile Health Data Collection in Rural Settings: Reliability, Completeness, and Design Implications</div>
+      <div class="pub-venue">Vol. 167 · Whatmore, C. &amp; [Co-authors]</div>
+      <div class="pub-abstract">Analysis of 50,000 mobile-collected health records to assess how network conditions, device literacy, and form design affect data completeness in rural community health worker programmes.</div>
+    </li>
+    <li class="pub-item">
+      <div class="pub-meta">2022 · Policy Brief</div>
+      <div class="pub-title">Towards a National Data Strategy for Zimbabwe: Recommendations for Health and Social Sectors</div>
+      <div class="pub-venue">Submitted to Ministry of ICT and Ministry of Health · Whatmore, C. &amp; Team</div>
+      <div class="pub-abstract">A policy brief offering actionable recommendations for a coherent national data governance strategy, addressing interoperability, data sovereignty, and capacity building.</div>
+    </li>
+  </ul>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CV
+═══════════════════════════════════════════ -->
+<section id="cv">
+  <div class="page-header">
+    <div class="page-tag">07 / Curriculum Vitae</div>
+    <h2 class="page-title">CV</h2>
+    <p class="page-sub">Academic profile, qualifications, and experience.</p>
+  </div>
+
+  <div class="cv-download-block">
+    <div>
+      <div class="cv-title-text">Chiketo Whatmore</div>
+      <div class="cv-sub-text">BSc Informatics and Analytics Student · Industrial Attachment Candidate</div>
+    </div>
+    <a class="btn btn-primary" href="mailto:chiketowhatmore20003@gmail.com">Contact Me</a>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Personal Information</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Phone</div>
+        <div class="cv-org">+263 774 877 481</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Email</div>
+        <div class="cv-org">chiketowhatmore20003@gmail.com / n02420367q@students.nust.ac.zw</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Location</div>
+        <div class="cv-org">Bulawayo, Zimbabwe</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Nationality</div>
+        <div class="cv-org">Zimbabwean</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Language</div>
+        <div class="cv-org">English, Shona</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Personal Profile</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Profile</div>
+        <div class="cv-org">I am a BSc Informatics and Analytics student at NUST who genuinely enjoys working with data and building practical systems. I like taking raw information, organising it, and turning it into insights or tools that help people make decisions. My interest in technology started at A-Level through Software Engineering and Business, and it has grown into hands-on work with Python, databases, and web technologies. I am now seeking a 12-month Industrial Attachment where I can learn directly from professionals, take responsibility for real tasks, and contribute positively to a team while developing my skills.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Academic Qualifications</div>
+    <div class="cv-row">
+      <div class="cv-date">2024 – Present</div>
+      <div class="cv-detail">
+        <div class="cv-role">BSc Honours in Informatics and Analytics</div>
+        <div class="cv-org">National University of Science and Technology (NUST) — Current Level: Part II (Available for Industrial Attachment 2026)</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date">2022 – 2023</div>
+      <div class="cv-detail">
+        <div class="cv-role">Advanced Level (ZIMSEC)</div>
+        <div class="cv-org">Biriiri High School — Software Engineering A, Economics A, Business Studies C</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date">2021</div>
+      <div class="cv-detail">
+        <div class="cv-role">Ordinary Level (ZIMSEC)</div>
+        <div class="cv-org">Kushinga Secondary School — 9 subjects completed, including Mathematics, English, and Science</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Technical Skills</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Data &amp; Analytics</div>
+        <div class="cv-org">Python (Pandas, NumPy, Matplotlib), SQL, Advanced Excel</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Development &amp; Tools</div>
+        <div class="cv-org">HTML, CSS, JavaScript, React, Node.js, Express</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Databases</div>
+        <div class="cv-org">MongoDB, MySQL</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Networking</div>
+        <div class="cv-org">Cisco Packet Tracer (network design &amp; simulation)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Certifications</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">AI in Business</div>
+        <div class="cv-org">Certified</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Data Science</div>
+        <div class="cv-org">Certified</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Presentation Skills</div>
+        <div class="cv-org">Certified</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Hackathons &amp; Activities</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">University Hackathons</div>
+        <div class="cv-org">Participated in university hackathons, collaborating in teams to build data-driven and system-based solutions under time constraints.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date">2024</div>
+      <div class="cv-detail">
+        <div class="cv-role">ZITF Bulawayo Hackathon</div>
+        <div class="cv-org">Presented an online school fees payment system.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">MSU Google Developer's Hackathon</div>
+        <div class="cv-org">Secured 5th place with my group.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">University &amp; Practical Projects</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Online Fees Payment System</div>
+        <div class="cv-org">Developed a web-based system for Chipinge Rural District Schools to manage school fees payments and records.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Hospital Resource Allocation System</div>
+        <div class="cv-org">Designed a data-driven system to support efficient allocation of hospital resources.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Fraud Detection System</div>
+        <div class="cv-org">Built an academic prototype to identify unusual transaction patterns using data analysis.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Real-Time Chat Application</div>
+        <div class="cv-org">Developed a MERN-stack chat system with real-time communication using Socket.io.</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Hybrid Network Design</div>
+        <div class="cv-org">Designed and simulated a wired and wireless computer lab network using Cisco Packet Tracer.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Clubs</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Memberships</div>
+        <div class="cv-org">Google Developer Student Club (GDSC); Spark Sphere Club</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Soft Skills</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Strengths</div>
+        <div class="cv-org">Curious and analytical thinker; able to explain technical ideas clearly; reliable, disciplined, and eager to learn; works well independently and in a team.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">Areas of Interest</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Focus Areas</div>
+        <div class="cv-org">Data Analysis &amp; Business Intelligence; Software &amp; Systems Development; IT Support &amp; Database Management; Network Administration.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-section">
+    <div class="cv-section-title">References</div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Mr T Tapatsa</div>
+        <div class="cv-org">0772 985 898 · Lecturer</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Mr S Ncube</div>
+        <div class="cv-org">0773 629 110 / 0718 216 590 · Lecturer / Industrial Attachment Coordinator</div>
+      </div>
+    </div>
+    <div class="cv-row">
+      <div class="cv-date"></div>
+      <div class="cv-detail">
+        <div class="cv-role">Mr K Sibanda</div>
+        <div class="cv-org">0712 544 684 · Lecturer / Chairperson, Informatics Department</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CONTACT
+═══════════════════════════════════════════ -->
+<section id="contact">
+  <div class="page-header">
+    <div class="page-tag">08 / Contact</div>
+    <h2 class="page-title">Get in Touch</h2>
+    <p class="page-sub">Open to collaborations, consultancies, and speaking engagements.</p>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="contact-item">
+        <div class="contact-label">Email</div>
+        <a href="mailto:chiketowhatmore20003@gmail.com" class="contact-val">chiketowhatmore20003@gmail.com</a>
+      </div>
+      <div class="contact-item">
+        <div class="contact-label">Phone</div>
+        <a href="tel:+263774877481" class="contact-val">+263 774 877 481</a>
+      </div>
+      <div class="contact-item">
+        <div class="contact-label">Location</div>
+        <span class="contact-val">Bulawayo, Zimbabwe</span>
+      </div>
+      <div class="contact-item">
+        <div class="contact-label">Student Email</div>
+        <a href="mailto:n02420367q@students.nust.ac.zw" class="contact-val">n02420367q@students.nust.ac.zw</a>
+      </div>
+      <div class="contact-note">
+        I am available for freelance analytics projects, data strategy consulting, research collaborations, and conference speaking engagements. Response time is typically within 48 hours.
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="form-group">
+        <label class="form-label">Your Name</label>
+        <input type="text" class="form-input" placeholder="Jane Moyo" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="jane@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" class="form-input" placeholder="Project enquiry / Speaking request / ..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" placeholder="Tell me about your project or enquiry..."></textarea>
+      </div>
+      <button class="form-submit" onclick="handleSubmit()">Send Message</button>
+      <div id="form-success" style="display:none;margin-top:1rem;font-size:.75rem;color:var(--accent);letter-spacing:.1em;">
+        ✓ Message sent. I'll be in touch shortly.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 Chiketo Whatmore. All rights reserved.</span>
+  <span>Informatics &amp; Analytics · Harare, Zimbabwe</span>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="#">LinkedIn</a>
+    <a href="#">GitHub</a>
+    <a href="#">ResearchGate</a>
+  </div>
+</footer>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.add('active');
+    const navEl = document.getElementById('nav-' + id);
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    return false;
+  }
+
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  function handleSubmit() {
+    document.getElementById('form-success').style.display = 'block';
+  }
+
+  // Animate counters on home page
+  function animateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseInt(el.getAttribute('data-count'));
+      let current = 0;
+      const step = Math.ceil(target / 30);
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = current + '+';
+      }, 40);
+    });
+  }
+
+  // Run counter on first load
+  window.addEventListener('load', () => {
+    setTimeout(animateCounters, 300);
+  });
+
+  // Re-run counter when navigating home
+  const origShow = window.showPage;
+</script>
+</body>
+</html>
